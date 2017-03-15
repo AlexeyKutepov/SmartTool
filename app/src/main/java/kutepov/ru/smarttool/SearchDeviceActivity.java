@@ -55,7 +55,10 @@ public class SearchDeviceActivity extends AppCompatActivity {
                 startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
             }
         } else {
-            //TODO диалоговое окно о невозможности использования приложения
+            builder.setMessage(R.string.bluetooth_is_not_supported_message)
+                    .setTitle(R.string.bluetooth_is_not_supported_title);
+            AlertDialog dialog = builder.create();
+            dialog.show();
         }
     }
 

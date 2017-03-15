@@ -7,4 +7,7 @@
 
     <string name="devices_not_found_dialog_title">Результат поиска</string>
     <string name="devices_not_found_dialog_message">Устройства не найдены :(</string>
+
+    <string name="bluetooth_is_not_supported_title">Ошибка</string>
+    <string name="bluetooth_is_not_supported_message">Ваш телефон не поддерживает bluetooth</string>
 </resources>
