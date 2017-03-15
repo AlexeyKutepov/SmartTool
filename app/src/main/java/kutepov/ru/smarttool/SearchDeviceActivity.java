@@ -3,6 +3,8 @@ package kutepov.ru.smarttool;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothServerSocket;
+import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -13,6 +15,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+
+import java.io.IOException;
 
 public class SearchDeviceActivity extends AppCompatActivity {
 
@@ -98,7 +102,10 @@ public class SearchDeviceActivity extends AppCompatActivity {
         }
     };
 
-    class WaitingSearchResultTask extends AsyncTask<Void, Void, Void> {
+    /**
+     * Ожидание завершения поиска устройств
+     */
+    private class WaitingSearchResultTask extends AsyncTask<Void, Void, Void> {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
