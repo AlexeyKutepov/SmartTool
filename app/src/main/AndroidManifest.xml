@@ -3,7 +3,6 @@
     package="kutepov.ru.smarttool">
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
-
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
 
     <application
@@ -20,7 +19,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".SearchDeviceActivity"></activity>
+        <activity android:name=".SearchDeviceActivity" />
+        <activity
+            android:name=".ProfileActivity"
+            android:label="@string/title_activity_profile"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

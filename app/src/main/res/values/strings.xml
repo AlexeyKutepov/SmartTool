@@ -10,4 +10,14 @@
 
     <string name="bluetooth_is_not_supported_title">Ошибка</string>
     <string name="bluetooth_is_not_supported_message">Ваш телефон не поддерживает bluetooth</string>
+
+    <!--Кнопки-->
+    <string name="search_device_button">Найти устройство</string>
+    <string name="profile_button">Профиль</string>
+
+    <!---->
+
+    <string name="title_activity_profile">Профиль</string>
+
+    <string name="action_settings">Settings</string>
 </resources>

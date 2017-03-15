@@ -19,4 +19,9 @@ public class MainActivity extends AppCompatActivity {
         Intent searchDeviceIntent = new Intent(this, SearchDeviceActivity.class);
         startActivity(searchDeviceIntent);
     }
+
+    public void onClickButtonProfile(View view) {
+        Intent profileIntent = new Intent(this, ProfileActivity.class);
+        startActivity(profileIntent);
+    }
 }
