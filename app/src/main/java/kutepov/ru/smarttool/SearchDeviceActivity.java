@@ -13,20 +13,27 @@ import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import java.io.IOException;
+
+import kutepov.ru.smarttool.common.Constants;
 
 public class SearchDeviceActivity extends AppCompatActivity {
 
     private final static int REQUEST_ENABLE_BT = 1;
 
     private BluetoothAdapter bluetooth;
+    private BluetoothSocket mmSocket;
+    private BluetoothDevice mmDevice;
     private ArrayAdapter<String> arrayAdapter;
     private ProgressDialog progressDialog;
     private WaitingSearchResultTask searchResultTask;
-    AlertDialog.Builder builder;
+    private AlertDialog.Builder builder;
 
 
     @Override
@@ -37,6 +44,8 @@ public class SearchDeviceActivity extends AppCompatActivity {
         ListView listViewDevices = (ListView) findViewById(R.id.listViewDevices);
         arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
         listViewDevices.setAdapter(arrayAdapter);
+
+        listViewDevices.setOnItemClickListener(onItemClickListener);
 
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle(R.string.search_devices_dialog_title);
@@ -84,6 +93,36 @@ public class SearchDeviceActivity extends AppCompatActivity {
             finish();
         }
     }
+
+    /**
+     * Выбор устройства для подключения и соединение с ним
+     */
+    private AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            Object item = parent.getItemAtPosition(position);
+            String address = item.toString().split("\n")[1];
+            mmDevice = bluetooth.getRemoteDevice(address);
+
+            try {
+                mmSocket = mmDevice.createRfcommSocketToServiceRecord(Constants.MY_UUID);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            bluetooth.cancelDiscovery();
+
+            try {
+                mmSocket.connect();
+            } catch (IOException e) {
+                try {
+                    mmSocket.close();
+                } catch (IOException e2) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    };
 
     /**
      * Поиск bluetooth-устройств
