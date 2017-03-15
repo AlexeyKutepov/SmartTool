@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Smart Tool</string>
+
+    <!--Диалоги-->
+    <string name="search_devices_dialog_title">Поиск устройств</string>
+    <string name="search_devices_dialog_message">Пожалуйста, подождите…</string>
+
+    <string name="devices_not_found_dialog_title">Результат поиска</string>
+    <string name="devices_not_found_dialog_message">Устройства не найдены :(</string>
 </resources>

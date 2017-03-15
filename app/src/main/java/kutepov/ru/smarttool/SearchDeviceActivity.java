@@ -1,11 +1,14 @@
 package kutepov.ru.smarttool;
 
+import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.AsyncTask;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
@@ -15,7 +18,11 @@ public class SearchDeviceActivity extends AppCompatActivity {
 
     private final static int REQUEST_ENABLE_BT = 1;
 
+    private BluetoothAdapter bluetooth;
     private ArrayAdapter<String> arrayAdapter;
+    private ProgressDialog progressDialog;
+    private WaitingSearchResultTask searchResultTask;
+    AlertDialog.Builder builder;
 
 
     @Override
@@ -27,30 +34,53 @@ public class SearchDeviceActivity extends AppCompatActivity {
         arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
         listViewDevices.setAdapter(arrayAdapter);
 
-        BluetoothAdapter bluetooth = BluetoothAdapter.getDefaultAdapter();
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setTitle(R.string.search_devices_dialog_title);
+        progressDialog.setMessage(getResources().getString(R.string.search_devices_dialog_message));
+
+        builder = new AlertDialog.Builder(this);
+
+        searchResultTask = new WaitingSearchResultTask();
+
+        bluetooth = BluetoothAdapter.getDefaultAdapter();
         if (bluetooth != null) {
             if (bluetooth.isEnabled()) {
                 IntentFilter filter=new IntentFilter(BluetoothDevice.ACTION_FOUND);
                 registerReceiver(mReceiver, filter);
                 bluetooth.startDiscovery();
+                searchResultTask.execute();
             } else {
                 // Bluetooth выключен. Предложим пользователю включить его.
                 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                 startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
             }
         } else {
-
+            //TODO диалоговое окно о невозможности использования приложения
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(mReceiver);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_CANCELED) {
+        if (resultCode == RESULT_OK) {
+            IntentFilter filter=new IntentFilter(BluetoothDevice.ACTION_FOUND);
+            registerReceiver(mReceiver, filter);
+            bluetooth.startDiscovery();
+            searchResultTask.execute();
+        } else if (resultCode == RESULT_CANCELED) {
             finish();
         }
     }
 
+    /**
+     * Поиск bluetooth-устройств
+     */
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -64,4 +94,32 @@ public class SearchDeviceActivity extends AppCompatActivity {
             }
         }
     };
+
+    class WaitingSearchResultTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressDialog.show();
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            while (bluetooth.isDiscovering()) {
+                continue;
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            progressDialog.dismiss();
+            if (arrayAdapter.isEmpty()) {
+                builder.setMessage(R.string.devices_not_found_dialog_message)
+                       .setTitle(R.string.devices_not_found_dialog_title);
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
+        }
+    }
 }
