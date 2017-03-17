@@ -1,6 +1,13 @@
 <resources>
     <string name="app_name">Smart Tool</string>
 
+    <!--Общие-->
+    <string name="last_name">Фамилия</string>
+    <string name="first_name">Имя</string>
+    <string name="middle_name">Отчество</string>
+    <string name="email">e-mail</string>
+    <string name="phone">Телефон</string>
+
     <!--Диалоги-->
     <string name="search_devices_dialog_title">Поиск устройств</string>
     <string name="search_devices_dialog_message">Пожалуйста, подождите…</string>

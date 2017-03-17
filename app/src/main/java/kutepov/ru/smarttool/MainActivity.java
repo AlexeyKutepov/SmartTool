@@ -21,7 +21,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClickButtonProfile(View view) {
-        Intent profileIntent = new Intent(this, ProfileActivity.class);
+        Intent profileIntent = new Intent(this, ProfileSettingsActivity.class);
         startActivity(profileIntent);
     }
 }
