@@ -14,15 +14,15 @@ import kutepov.ru.smarttool.db.entity.Profile;
 
 public class ProfileDao extends BaseDaoImpl<Profile, Integer> {
 
-    protected ProfileDao(Class<Profile> dataClass) throws SQLException {
+    public ProfileDao(Class<Profile> dataClass) throws SQLException {
         super(dataClass);
     }
 
-    protected ProfileDao(ConnectionSource connectionSource, Class<Profile> dataClass) throws SQLException {
+    public ProfileDao(ConnectionSource connectionSource, Class<Profile> dataClass) throws SQLException {
         super(connectionSource, dataClass);
     }
 
-    protected ProfileDao(ConnectionSource connectionSource, DatabaseTableConfig<Profile> tableConfig) throws SQLException {
+    public ProfileDao(ConnectionSource connectionSource, DatabaseTableConfig<Profile> tableConfig) throws SQLException {
         super(connectionSource, tableConfig);
     }
 }

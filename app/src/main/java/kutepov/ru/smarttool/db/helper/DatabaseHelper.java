@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.dao.Dao;
+import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
@@ -71,7 +72,7 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
      */
     public ProfileDao getProfileDao() throws SQLException {
         if (profileDao == null) {
-            profileDao = getDao(Profile.class);
+            profileDao = new ProfileDao(connectionSource, Profile.class);
         }
         return profileDao;
     }

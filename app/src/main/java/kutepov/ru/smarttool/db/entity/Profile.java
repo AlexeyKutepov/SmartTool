@@ -29,6 +29,15 @@ public class Profile {
     public Profile() {
     }
 
+    public Profile(int id, String lastName, String firstName, String middleName, String phone, String email) {
+        this.id = id;
+        this.lastName = lastName;
+        this.firstName = firstName;
+        this.middleName = middleName;
+        this.phone = phone;
+        this.email = email;
+    }
+
     public Profile(String lastName, String firstName, String middleName, String phone, String email) {
         this.lastName = lastName;
         this.firstName = firstName;
