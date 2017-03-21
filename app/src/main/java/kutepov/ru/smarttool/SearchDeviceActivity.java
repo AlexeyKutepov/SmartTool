@@ -19,14 +19,23 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.google.gson.Gson;
+import com.j256.ormlite.android.apptools.OpenHelperManager;
+
 import java.io.IOException;
+import java.io.OutputStream;
+import java.sql.SQLException;
 
 import kutepov.ru.smarttool.common.Constants;
+import kutepov.ru.smarttool.db.dao.ProfileDao;
+import kutepov.ru.smarttool.db.entity.Profile;
+import kutepov.ru.smarttool.db.helper.DatabaseHelper;
 
 public class SearchDeviceActivity extends AppCompatActivity {
 
     private final static int REQUEST_ENABLE_BT = 1;
 
+    private DatabaseHelper databaseHelper;
     private BluetoothAdapter bluetooth;
     private BluetoothSocket mmSocket;
     private BluetoothDevice mmDevice;
@@ -40,6 +49,8 @@ public class SearchDeviceActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_device);
+
+        databaseHelper = OpenHelperManager.getHelper(this, DatabaseHelper.class);
 
         ListView listViewDevices = (ListView) findViewById(R.id.listViewDevices);
         arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
@@ -114,6 +125,7 @@ public class SearchDeviceActivity extends AppCompatActivity {
 
             try {
                 mmSocket.connect();
+                syncData();
             } catch (IOException e) {
                 try {
                     mmSocket.close();
@@ -123,6 +135,33 @@ public class SearchDeviceActivity extends AppCompatActivity {
             }
         }
     };
+
+    /**
+     * Синхронизация данных по bluetooth
+     */
+    private void syncData() {
+        if (mmSocket.isConnected()) {
+            Profile profile;
+            try {
+                ProfileDao profileDao = databaseHelper.getProfileDao();
+                profile = profileDao.queryForId(1);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return;
+            }
+            if (profile != null) {
+                Gson gson = new Gson();
+                String json = gson.toJson(profile);
+                try {
+                    OutputStream outputStream = mmSocket.getOutputStream();
+                    outputStream.write(json.getBytes());
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 
     /**
      * Поиск bluetooth-устройств
