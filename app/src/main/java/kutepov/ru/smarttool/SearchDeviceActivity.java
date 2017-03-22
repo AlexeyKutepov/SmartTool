@@ -35,10 +35,9 @@ public class SearchDeviceActivity extends AppCompatActivity {
 
     private final static int REQUEST_ENABLE_BT = 1;
 
-    private DatabaseHelper databaseHelper;
     private BluetoothAdapter bluetooth;
-    private BluetoothSocket mmSocket;
-    private BluetoothDevice mmDevice;
+    private Intent bluetoothService;
+
     private ArrayAdapter<String> arrayAdapter;
     private ProgressDialog progressDialog;
     private WaitingSearchResultTask searchResultTask;
@@ -49,8 +48,6 @@ public class SearchDeviceActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_device);
-
-        databaseHelper = OpenHelperManager.getHelper(this, DatabaseHelper.class);
 
         ListView listViewDevices = (ListView) findViewById(R.id.listViewDevices);
         arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
@@ -65,6 +62,8 @@ public class SearchDeviceActivity extends AppCompatActivity {
         builder = new AlertDialog.Builder(this);
 
         searchResultTask = new WaitingSearchResultTask();
+
+        bluetoothService = new Intent(this, BluetoothService.class);
 
         bluetooth = BluetoothAdapter.getDefaultAdapter();
         if (bluetooth != null) {
@@ -113,55 +112,13 @@ public class SearchDeviceActivity extends AppCompatActivity {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             Object item = parent.getItemAtPosition(position);
             String address = item.toString().split("\n")[1];
-            mmDevice = bluetooth.getRemoteDevice(address);
-
-            try {
-                mmSocket = mmDevice.createRfcommSocketToServiceRecord(Constants.MY_UUID);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
             bluetooth.cancelDiscovery();
 
-            try {
-                mmSocket.connect();
-                syncData();
-            } catch (IOException e) {
-                try {
-                    mmSocket.close();
-                } catch (IOException e2) {
-                    e.printStackTrace();
-                }
-            }
+            bluetoothService.putExtra(Constants.MAC, address);
+            startService(bluetoothService);
         }
     };
 
-    /**
-     * Синхронизация данных по bluetooth
-     */
-    private void syncData() {
-        if (mmSocket.isConnected()) {
-            Profile profile;
-            try {
-                ProfileDao profileDao = databaseHelper.getProfileDao();
-                profile = profileDao.queryForId(1);
-            } catch (SQLException e) {
-                e.printStackTrace();
-                return;
-            }
-            if (profile != null) {
-                Gson gson = new Gson();
-                String json = gson.toJson(profile);
-                try {
-                    OutputStream outputStream = mmSocket.getOutputStream();
-                    outputStream.write(json.getBytes());
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
 
     /**
      * Поиск bluetooth-устройств

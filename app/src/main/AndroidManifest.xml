@@ -20,7 +20,12 @@
             </intent-filter>
         </activity>
         <activity android:name=".SearchDeviceActivity" />
-        <activity android:name=".ProfileSettingsActivity"></activity>
+        <activity android:name=".ProfileSettingsActivity" />
+
+        <service
+            android:name=".BluetoothService"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>
