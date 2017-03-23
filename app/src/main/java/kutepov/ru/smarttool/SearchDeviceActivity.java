@@ -25,6 +25,8 @@ import com.j256.ormlite.android.apptools.OpenHelperManager;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import kutepov.ru.smarttool.common.Constants;
 import kutepov.ru.smarttool.db.dao.ProfileDao;
@@ -38,6 +40,7 @@ public class SearchDeviceActivity extends AppCompatActivity {
     private BluetoothAdapter bluetooth;
     private Intent bluetoothService;
 
+    private ListView listViewDevices;
     private ArrayAdapter<String> arrayAdapter;
     private ProgressDialog progressDialog;
     private WaitingSearchResultTask searchResultTask;
@@ -49,7 +52,7 @@ public class SearchDeviceActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_device);
 
-        ListView listViewDevices = (ListView) findViewById(R.id.listViewDevices);
+        listViewDevices = (ListView) findViewById(R.id.listViewDevices);
         arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
         listViewDevices.setAdapter(arrayAdapter);
 
@@ -133,7 +136,14 @@ public class SearchDeviceActivity extends AppCompatActivity {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 //Добавляем имя и адрес в array adapter, чтобы показвать в ListView
                 arrayAdapter.add(device.getName() + "\n" + device.getAddress());
+                runOnUiThread(updateListView);
             }
+        }
+    };
+
+    Runnable updateListView = new Runnable(){
+        public void run(){
+            arrayAdapter.notifyDataSetChanged();
         }
     };
 
