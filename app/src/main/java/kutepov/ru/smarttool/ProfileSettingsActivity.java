@@ -1,6 +1,8 @@
 package kutepov.ru.smarttool;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.EditText;
 
@@ -13,6 +15,8 @@ import kutepov.ru.smarttool.db.entity.Profile;
 import kutepov.ru.smarttool.db.helper.DatabaseHelper;
 
 public class ProfileSettingsActivity extends OrmLiteBaseActivity<DatabaseHelper> {
+
+    private AlertDialog.Builder builder;
 
     private EditText editTextLastName;
     private EditText editTextFirstName;
@@ -27,12 +31,30 @@ public class ProfileSettingsActivity extends OrmLiteBaseActivity<DatabaseHelper>
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile_settings);
 
+        /*
+         * Диалоговые окна
+         */
+        builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.save_profile_dialog_title)
+                .setMessage(R.string.save_profile_dialog_message);
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                finish();
+            }
+        });
+
+        /*
+         * Интерфейс
+         */
         editTextLastName = (EditText) findViewById(R.id.editTextLastName);
         editTextFirstName = (EditText) findViewById(R.id.editTextFirstName);
         editTextMiddleName = (EditText) findViewById(R.id.editTextMiddleName);
         editTextPhone = (EditText) findViewById(R.id.editTextPhone);
         editTextEmailAddress = (EditText) findViewById(R.id.editTextEmailAddress);
 
+        /*
+         * База данных
+         */
         try {
             profileDao = getHelper().getProfileDao();
             loadData();
@@ -41,6 +63,16 @@ public class ProfileSettingsActivity extends OrmLiteBaseActivity<DatabaseHelper>
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        getHelper().close();
+    }
+
+    /**
+     * Сохранение данных
+     * @param view view
+     */
     public void onClickButtonSave(View view) {
         Profile profile = new Profile(
                 1,
@@ -55,6 +87,14 @@ public class ProfileSettingsActivity extends OrmLiteBaseActivity<DatabaseHelper>
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        AlertDialog dialog = builder.create();
+        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                finish();
+            }
+        });
+        dialog.show();
     }
 
     /**

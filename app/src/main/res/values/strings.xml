@@ -8,6 +8,7 @@
     <string name="email">e-mail</string>
     <string name="phone">Телефон</string>
     <string name="save">Сохранить</string>
+    <string name="ok">OK</string>
 
     <!--Диалоги-->
     <string name="search_devices_dialog_title">Поиск устройств</string>
@@ -18,6 +19,9 @@
 
     <string name="bluetooth_is_not_supported_title">Ошибка</string>
     <string name="bluetooth_is_not_supported_message">Ваш телефон не поддерживает bluetooth</string>
+
+    <string name="save_profile_dialog_title">Профиль</string>
+    <string name="save_profile_dialog_message">Данные сохранены</string>
 
     <!--Кнопки-->
     <string name="search_device_button">Найти устройство</string>

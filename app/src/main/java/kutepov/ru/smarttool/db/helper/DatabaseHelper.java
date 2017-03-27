@@ -6,12 +6,11 @@ import android.util.Log;
 
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.dao.Dao;
-import com.j256.ormlite.dao.DaoManager;
-import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 
 import java.sql.SQLException;
+import java.util.UUID;
 
 import kutepov.ru.smarttool.R;
 import kutepov.ru.smarttool.db.dao.ProfileDao;
@@ -37,6 +36,8 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
         try {
             Log.i(DatabaseHelper.class.getName(), "onCreate");
             TableUtils.createTable(connectionSource, Profile.class);
+
+            populateProfile();
         } catch (SQLException e) {
             Log.e(DatabaseHelper.class.getName(), "Can't create database", e);
             throw new RuntimeException(e);
@@ -77,4 +78,16 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
         return profileDao;
     }
 
+    /**
+     * Создаём запись с UUID в таблице Profile
+     * @throws SQLException
+     */
+    private void populateProfile() throws SQLException {
+        Profile profile = new Profile(
+                1,
+                UUID.randomUUID()
+        );
+        profileDao = getProfileDao();
+        profileDao.createOrUpdate(profile);
+    }
 }

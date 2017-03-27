@@ -13,6 +13,7 @@ import com.google.gson.Gson;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.SQLException;
 
@@ -58,6 +59,7 @@ public class BluetoothService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        databaseHelper.close();
 
         if (socket != null && socket.isConnected()) {
             try {
@@ -112,14 +114,40 @@ public class BluetoothService extends Service {
                 return;
             }
             if (profile != null) {
-                Gson gson = new Gson();
-                String json = gson.toJson(profile);
                 try {
                     OutputStream outputStream = socket.getOutputStream();
-                    outputStream.write(json.getBytes());
-
+                    outputStream.write(profile.getUuid().toString().getBytes());
                 } catch (IOException e) {
                     e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    /**
+     * Получение данных от устройства
+     */
+    private class ConnectedThread extends Thread {
+        private final InputStream mmInStream;
+
+        public ConnectedThread() {
+            InputStream tmpIn = null;
+            try {
+                tmpIn = socket.getInputStream();
+            } catch (IOException ignored) {
+            }
+            mmInStream = tmpIn;
+        }
+
+        public void run() {
+            byte[] buffer = new byte[1024];// буферный массив
+            int bytes;
+
+            while (socket.isConnected()) {
+                try {
+                    bytes = mmInStream.read(buffer);
+                } catch (IOException e) {
+                    break;
                 }
             }
         }

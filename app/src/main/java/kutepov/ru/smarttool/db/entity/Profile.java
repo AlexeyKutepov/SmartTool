@@ -2,6 +2,8 @@ package kutepov.ru.smarttool.db.entity;
 
 import com.j256.ormlite.field.DatabaseField;
 
+import java.util.UUID;
+
 /**
  * Профиль-визитка пользователя
  */
@@ -10,6 +12,9 @@ public class Profile {
 
     @DatabaseField(generatedId = true)
     private int id;
+
+    @DatabaseField
+    private UUID uuid;
 
     @DatabaseField
     private String lastName;
@@ -29,8 +34,14 @@ public class Profile {
     public Profile() {
     }
 
-    public Profile(int id, String lastName, String firstName, String middleName, String phone, String email) {
+    public Profile(int id, UUID uuid) {
         this.id = id;
+        this.uuid = uuid;
+    }
+
+    public Profile(int id, UUID uuid, String lastName, String firstName, String middleName, String phone, String email) {
+        this.id = id;
+        this.uuid = uuid;
         this.lastName = lastName;
         this.firstName = firstName;
         this.middleName = middleName;
@@ -38,7 +49,8 @@ public class Profile {
         this.email = email;
     }
 
-    public Profile(String lastName, String firstName, String middleName, String phone, String email) {
+    public Profile(int id, String lastName, String firstName, String middleName, String phone, String email) {
+        this.id = id;
         this.lastName = lastName;
         this.firstName = firstName;
         this.middleName = middleName;
@@ -52,6 +64,14 @@ public class Profile {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
     }
 
     public String getLastName() {
@@ -98,6 +118,7 @@ public class Profile {
     public String toString() {
         return "Profile{" +
                 "id=" + id +
+                ", uuid=" + uuid +
                 ", lastName='" + lastName + '\'' +
                 ", firstName='" + firstName + '\'' +
                 ", middleName='" + middleName + '\'' +
