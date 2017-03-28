@@ -66,7 +66,6 @@ public class ProfileSettingsActivity extends OrmLiteBaseActivity<DatabaseHelper>
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        getHelper().close();
     }
 
     /**

@@ -5,28 +5,20 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
-import android.os.Bundle;
 import android.os.IBinder;
-import android.support.annotation.IntDef;
-
-import com.google.gson.Gson;
-import com.j256.ormlite.android.apptools.OpenHelperManager;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.sql.SQLException;
 
 import kutepov.ru.smarttool.common.Constants;
-import kutepov.ru.smarttool.db.dao.ProfileDao;
-import kutepov.ru.smarttool.db.entity.Profile;
-import kutepov.ru.smarttool.db.helper.DatabaseHelper;
+
 
 public class BluetoothService extends Service {
 
-    private DatabaseHelper databaseHelper;
 
     private String address;
+    private String uuid;
 
     private BluetoothAdapter bluetooth;
     private BluetoothSocket socket;
@@ -38,13 +30,13 @@ public class BluetoothService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        databaseHelper = OpenHelperManager.getHelper(this, DatabaseHelper.class);
         bluetooth = BluetoothAdapter.getDefaultAdapter();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         this.address = intent.getStringExtra(Constants.MAC);
+        this.uuid = intent.getStringExtra(Constants.PROFILE_UUID);
 
         if (bluetooth != null && bluetooth.isEnabled()) {
             if (socket == null || !socket.isConnected()) {
@@ -59,8 +51,6 @@ public class BluetoothService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        databaseHelper.close();
-
         if (socket != null && socket.isConnected()) {
             try {
                 socket.close();
@@ -105,21 +95,11 @@ public class BluetoothService extends Service {
      */
     private void syncData() {
         if (socket.isConnected()) {
-            Profile profile;
             try {
-                ProfileDao profileDao = databaseHelper.getProfileDao();
-                profile = profileDao.queryForId(1);
-            } catch (SQLException e) {
+                OutputStream outputStream = socket.getOutputStream();
+                outputStream.write(uuid.getBytes());
+            } catch (IOException e) {
                 e.printStackTrace();
-                return;
-            }
-            if (profile != null) {
-                try {
-                    OutputStream outputStream = socket.getOutputStream();
-                    outputStream.write(profile.getUuid().toString().getBytes());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
             }
         }
     }

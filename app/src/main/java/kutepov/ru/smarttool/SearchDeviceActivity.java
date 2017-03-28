@@ -1,5 +1,6 @@
 package kutepov.ru.smarttool;
 
+import android.app.ActivityManager;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -21,12 +22,14 @@ import android.widget.ListView;
 
 import com.google.gson.Gson;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
+import com.j256.ormlite.android.apptools.OrmLiteConfigUtil;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import kutepov.ru.smarttool.common.Constants;
 import kutepov.ru.smarttool.db.dao.ProfileDao;
@@ -40,6 +43,9 @@ public class SearchDeviceActivity extends AppCompatActivity {
     private BluetoothAdapter bluetooth;
     private Intent bluetoothService;
 
+    private DatabaseHelper databaseHelper;
+    private ProfileDao profileDao;
+
     private ListView listViewDevices;
     private ArrayAdapter<String> arrayAdapter;
     private ProgressDialog progressDialog;
@@ -52,22 +58,43 @@ public class SearchDeviceActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_device);
 
+        /*
+         * База данных
+         */
+        databaseHelper = OpenHelperManager.getHelper(this, DatabaseHelper.class);
+        try {
+            profileDao = databaseHelper.getProfileDao();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            finish();
+        }
+
+        /*
+         * Интерфейс
+         */
         listViewDevices = (ListView) findViewById(R.id.listViewDevices);
         arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
         listViewDevices.setAdapter(arrayAdapter);
-
         listViewDevices.setOnItemClickListener(onItemClickListener);
 
+        /*
+         * Диалоговые окна
+         */
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle(R.string.search_devices_dialog_title);
         progressDialog.setMessage(getResources().getString(R.string.search_devices_dialog_message));
 
         builder = new AlertDialog.Builder(this);
 
+        /*
+         * Задачи
+         */
         searchResultTask = new WaitingSearchResultTask();
 
+        /*
+         * bluetooth
+         */
         bluetoothService = new Intent(this, BluetoothService.class);
-
         bluetooth = BluetoothAdapter.getDefaultAdapter();
         if (bluetooth != null) {
             if (bluetooth.isEnabled()) {
@@ -113,11 +140,28 @@ public class SearchDeviceActivity extends AppCompatActivity {
     private AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            stopService(bluetoothService);
             Object item = parent.getItemAtPosition(position);
             String address = item.toString().split("\n")[1];
             bluetooth.cancelDiscovery();
-
             bluetoothService.putExtra(Constants.MAC, address);
+            Profile profile;
+            try {
+                profile = profileDao.queryForId(1);
+                if (profile == null) {
+                    profile = new Profile(
+                            1,
+                            UUID.randomUUID()
+                    );
+                } else if (profile.getUuid() == null) {
+                    profile.setUuid(UUID.randomUUID());
+                }
+                profileDao.createOrUpdate(profile);
+            } catch (SQLException e) {
+                return;
+            }
+            bluetoothService.putExtra(Constants.PROFILE_UUID, profile.getUuid().toString());
+
             startService(bluetoothService);
         }
     };
